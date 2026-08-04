@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Wrench / spanner mark for tech services -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M69.5,37.5 L85.5,21.5 L87.5,23.5 L76,35 L80,39 L91,35 L91,40 L76,44 L74.5,42.5 L77,45 L62,60 C60.5,57 58,54.5 54.5,53 L69.5,37.5 Z" />
+    <!-- hex bolt -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,48 L40,50 L37,46 L37,40 L43,36 L49,36 L54,40 L56,44 L54,49 L49,52 L44,48 Z" />
+</vector>
