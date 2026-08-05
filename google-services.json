@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496481133019",
+    "project_id": "didwana-techcare",
+    "storage_bucket": "didwana-techcare.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496481133019:android:ebcddd6ed917f6aee107fe",
+        "android_client_info": {
+          "package_name": "comdidwanatechcare.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFbcXd4qEMDJiOQN_F3gwNvm3Lb8pJaMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
