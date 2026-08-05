@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function isValidMobile(m) { return m is string && m.matches('^[6-9][0-9]{9}$'); }
+    function isValidStatus(s) { return s in ['new','contacted','completed','cancelled']; }
+    function isValidType(t) { return t in ['repair','buy']; }
+
+    match /requests/{requestId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.id == requestId
+        && request.resource.data.customerUid == request.auth.uid
+        && isValidStatus(request.resource.data.status)
+        && isValidType(request.resource.data.type)
+        && isValidMobile(request.resource.data.mobile)
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.problemDesc is string
+        && request.resource.data.problemDesc.size() <= 1000
+        && request.resource.data.address is string
+        && request.resource.data.address.size() <= 300
+        && request.resource.data.photos.size() <= 5
+        && request.resource.data.thumbnails.size() <= 5
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+    match /adminTokens/{token} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.uid == request.auth.uid && request.resource.data.token == token;
+      allow update: if isAdmin() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin() && resource.data.uid == request.auth.uid;
+    }
+    match /config/public {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
