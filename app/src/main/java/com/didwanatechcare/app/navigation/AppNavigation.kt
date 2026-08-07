@@ -25,12 +25,14 @@ fun AppNavigation() {
                 onNavigateToSettings = { nav.navigate(Routes.SETTINGS) }
             )
         }
-        composable(Routes.REPAIR_FORM) { RepairFormScreen { nav.popBackStack() } }
-        composable(Routes.BUY_FORM) { BuyFormScreen { nav.popBackStack() } }
+        composable(Routes.REPAIR_FORM) {
+            RepairFormScreen(onBack = { nav.popBackStack() }, onSubmitted = { id -> nav.navigate(Routes.confirmation(id)) })
+        }
+        composable(Routes.BUY_FORM) {
+            BuyFormScreen(onBack = { nav.popBackStack() }, onSubmitted = { id -> nav.navigate(Routes.confirmation(id)) })
+        }
         composable(Routes.CONFIRMATION) { e ->
-            ConfirmationScreen(e.arguments?.getString("requestId") ?: "") {
-                nav.popBackStack(Routes.HOME, false)
-            }
+            ConfirmationScreen(e.arguments?.getString("requestId") ?: "") { nav.popBackStack(Routes.HOME, false) }
         }
         composable(Routes.ADMIN_LOGIN) { AdminLoginScreen { nav.popBackStack() } }
         composable(Routes.ADMIN_DASHBOARD) { AdminDashboardScreen() }
