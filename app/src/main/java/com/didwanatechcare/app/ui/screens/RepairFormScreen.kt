@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,18 +25,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.didwanatechcare.app.data.RepairInput
+import com.didwanatechcare.app.data.SubmitResult
+import com.didwanatechcare.app.data.SubmissionRepository
 import com.didwanatechcare.app.ui.components.CategoryPicker
 import com.didwanatechcare.app.ui.components.LabeledField
 import com.didwanatechcare.app.ui.components.PhotoPickerRow
 import com.didwanatechcare.app.util.Validation
-import java.util.UUID
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RepairFormScreen(onBack: () -> Unit, onSubmitted: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
     val categories = listOf("Mobile Repair","Laptop Repair","Computer Repair","Printer Repair","CCTV / Camera","Other")
     var category by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -46,6 +54,7 @@ fun RepairFormScreen(onBack: () -> Unit, onSubmitted: (String) -> Unit) {
     var time by remember { mutableStateOf("") }
     var photos by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var error by remember { mutableStateOf("") }
+    var submitting by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) { photos = it.take(5) }
 
     Scaffold(topBar = { TopAppBar(title = { Text("Repair Service") }, navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") } }) }) { padding ->
@@ -59,7 +68,7 @@ fun RepairFormScreen(onBack: () -> Unit, onSubmitted: (String) -> Unit) {
             LabeledField("Preferred Time (optional)", time, { time = it }, "e.g. Evening")
             PhotoPickerRow(photos.size, { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, { photos = emptyList() })
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(4.dp))
-            Button(onClick = {
+            Button(enabled = !submitting, onClick = {
                 val m = Validation.normalizeMobile(mobile)
                 when {
                     category.isEmpty() -> error = "Category select karein"
@@ -67,9 +76,22 @@ fun RepairFormScreen(onBack: () -> Unit, onSubmitted: (String) -> Unit) {
                     !Validation.isValidMobile(m) -> error = "Sahi 10-digit mobile number likhein"
                     address.trim().length < 10 -> error = "Poora address likhein"
                     problem.trim().length < 10 -> error = "Problem kam se kam 10 akshar me likhein"
-                    else -> { error = ""; onSubmitted(UUID.randomUUID().toString()) }
+                    else -> {
+                        error = ""; submitting = true
+                        scope.launch {
+                            val res = SubmissionRepository.submitRepair(ctx, RepairInput(category, name.trim(), m, address.trim(), problem.trim(), notes.trim(), time.trim(), photos))
+                            submitting = false
+                            when (res) {
+                                is SubmitResult.Success -> onSubmitted(res.requestId)
+                                is SubmitResult.Error -> error = res.msg
+                            }
+                        }
+                    }
                 }
-            }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { Text("Submit Request") }
+            }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                if (submitting) CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.padding(end = 8.dp))
+                Text("Submit Request")
+            }
         }
     }
 }
