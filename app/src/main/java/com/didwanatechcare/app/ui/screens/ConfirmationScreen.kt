@@ -2,6 +2,7 @@ package com.didwanatechcare.app.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,11 +43,15 @@ fun ConfirmationScreen(requestId: String, onHome: () -> Unit) {
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = {
-                    ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+${SupportConfig.CALL_NUMBER}")))
+                    runCatching {
+                        ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+${SupportConfig.CALL_NUMBER}")))
+                    }.onFailure { Toast.makeText(ctx, "Dialer available nahi hai", Toast.LENGTH_SHORT).show() }
                 }, modifier = Modifier.weight(1f)) { Text("Call Now") }
                 Button(onClick = {
                     val msg = Uri.encode("Namaste! Mujhe Didwana TechCare se service chahiye. Request ID: $requestId")
-                    ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/${SupportConfig.WA_NUMBER}?text=$msg")))
+                    runCatching {
+                        ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/${SupportConfig.WA_NUMBER}?text=$msg")))
+                    }.onFailure { Toast.makeText(ctx, "WhatsApp/browser available nahi hai", Toast.LENGTH_SHORT).show() }
                 }, modifier = Modifier.weight(1f)) { Text("WhatsApp") }
             }
             Spacer(Modifier.height(16.dp))
