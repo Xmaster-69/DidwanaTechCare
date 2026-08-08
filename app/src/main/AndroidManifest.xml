@@ -10,6 +10,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DidwanaTechCare">
+        <provider
+            android:name=".CrashProvider"
+            android:authorities="${applicationId}.crashprovider"
+            android:exported="false"
+            android:initOrder="100000000" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
