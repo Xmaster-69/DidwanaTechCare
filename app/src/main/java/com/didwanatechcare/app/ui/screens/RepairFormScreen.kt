@@ -66,7 +66,7 @@ fun RepairFormScreen(onBack: () -> Unit, onSubmitted: (String) -> Unit) {
             LabeledField("Problem Description", problem, { problem = it }, "Problem detail me likhein", maxLines = 4)
             LabeledField("Notes (optional)", notes, { notes = it }, "Koi aur baat")
             LabeledField("Preferred Time (optional)", time, { time = it }, "e.g. Evening")
-            PhotoPickerRow(photos.size, { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, { photos = emptyList() })
+            PhotoPickerRow(photos.size, { runCatching { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } }, { photos = emptyList() })
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(4.dp))
             Button(enabled = !submitting, onClick = {
                 val m = Validation.normalizeMobile(mobile)
